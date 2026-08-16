@@ -21,6 +21,7 @@ type Message = {
   role: 'user' | 'assistant';
   text: string;
   time: string;
+  image?: string;
 };
 
 const starterMessages: Message[] = [
@@ -72,14 +73,16 @@ function App() {
   const [isDark, setIsDark] = useState(false);
   const [sceneIndex, setSceneIndex] = useState(1);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isAboutOpen, setIsAboutOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const sendMessage = async (event?: FormEvent) => {
   event?.preventDefault();
 
   const trimmedInput = input.trim();
 
-  if (!trimmedInput || isThinking) return;
+  if ((!trimmedInput && !selectedImage) || isThinking) return;
 
   const now = new Date();
   const time = now.toLocaleTimeString('ru-RU', {
@@ -87,18 +90,19 @@ function App() {
     minute: '2-digit',
   });
 
-  const userMessage: Message = {
-    id: Date.now(),
-    role: 'user',
-    text: trimmedInput,
-    time,
-  };
-
+ const userMessage: Message = {
+  id: Date.now(),
+  role: 'user',
+  text: trimmedInput || 'Посмотри на это изображение.',
+  time,
+  image: selectedImage || undefined,
+};
   const updatedMessages = [...messages, userMessage];
 
   setMessages(updatedMessages);
   setInput('');
   setIsThinking(true);
+  setSelectedImage(null);
 
   try {
     const response = await fetch('/api/chat', {
@@ -107,11 +111,24 @@ function App() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        messages: updatedMessages.map((message) => ({
-          role: message.role,
-          content: message.text,
-        })),
-      }),
+  messages: updatedMessages.map((message) => ({
+    role: message.role,
+    content: message.image
+      ? [
+          {
+            type: 'text',
+            text: message.text || 'Посмотри на это изображение.',
+          },
+          {
+            type: 'image_url',
+            image_url: {
+              url: message.image,
+            },
+          },
+        ]
+      : message.text,
+  })),
+}),
     });
 
     const data = await response.json();
@@ -187,7 +204,15 @@ function App() {
             <a href="#conversation" onClick={() => setMobileMenuOpen(false)}>Чат</a>
             <a href="#modes" onClick={() => setMobileMenuOpen(false)}>Режимы</a>
             <a href="#library" onClick={() => setMobileMenuOpen(false)}>Библиотека</a>
-            <a href="#about" onClick={() => setMobileMenuOpen(false)}>О нас</a>
+            <button
+  className="about-nav-button"
+  onClick={() => {
+    setIsAboutOpen(true);
+    setMobileMenuOpen(false);
+  }}
+>
+  О нас
+</button>
           </nav>
 
           <div className="top-actions">
@@ -220,7 +245,14 @@ function App() {
               <div className={`message-row ${message.role}`} key={message.id}>
                 {message.role === 'assistant' && <div className="avatar"><Leaf size={16} /></div>}
                 <div className="message-content">
-                  <div className="message-bubble">{message.text}</div>
+                  {message.image && (
+  <img
+    src={message.image}
+    alt="Отправленное изображение"
+    className="message-image"
+  />
+)}
+<div className="message-bubble">{message.text}</div>
                   <span className="message-time">{message.time}</span>
                 </div>
               </div>
@@ -228,8 +260,47 @@ function App() {
             {isThinking && <div className="message-row assistant"><div className="avatar"><Leaf size={16} /></div><div className="thinking"><span /><span /><span /></div></div>}
           </div>
           <form className="composer" onSubmit={sendMessage}>
-            <button type="button" className="composer-action" onClick={() => fileInputRef.current?.click()} aria-label="Загрузить изображение"><ImagePlus size={20} /></button>
-            <input ref={fileInputRef} type="file" accept="image/*" hidden />
+            {selectedImage && (
+  <div className="image-preview">
+    <img src={selectedImage} alt="Выбранное изображение" />
+
+    <button
+      type="button"
+      onClick={() => setSelectedImage(null)}
+      aria-label="Удалить изображение"
+    >
+      <X size={14} />
+    </button>
+  </div>
+)}
+            <button
+  type="button"
+  className="composer-action"
+  onClick={() => fileInputRef.current?.click()}
+  aria-label="Загрузить изображение"
+>
+  <ImagePlus size={20} />
+</button>
+
+<input
+  ref={fileInputRef}
+  type="file"
+  accept="image/*"
+  hidden
+  onChange={(event) => {
+  const file = event.target.files?.[0];
+
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    setSelectedImage(reader.result as string);
+  };
+
+  reader.readAsDataURL(file);
+}}
+/>
             <input value={input} onChange={(event) => setInput(event.target.value)} placeholder="Напиши что-нибудь..." aria-label="Сообщение" />
             <button type="submit" className="send-button" aria-label="Отправить сообщение"><Send size={18} /></button>
           </form>
@@ -247,6 +318,54 @@ function App() {
           </div>
         </section>
 
+{isAboutOpen && (
+  <div
+    className="about-overlay"
+    onClick={() => setIsAboutOpen(false)}
+  >
+    <div
+      className="about-modal"
+      onClick={(event) => event.stopPropagation()}
+    >
+      <button
+        className="about-close"
+        onClick={() => setIsAboutOpen(false)}
+        aria-label="Закрыть"
+      >
+        <X size={18} />
+      </button>
+
+      <div className="about-logo">
+        <Leaf size={28} strokeWidth={1.4} />
+      </div>
+
+      <span className="about-label">О проекте</span>
+
+      <h2>Verdantide</h2>
+
+      <p className="about-description">
+        Нейросеть для общения, обучения, творчества
+        и исследования мира вокруг нас.
+      </p>
+
+      <div className="about-team">
+        <div className="team-member">
+          <strong>KAZE</strong>
+          <span>Разработчик</span>
+        </div>
+
+        <div className="team-member">
+          <strong>teila</strong>
+          <span>Дизайнер</span>
+        </div>
+      </div>
+
+      <div className="about-copyright">
+        © 2026 Verdantide · Создано с уважением к миру вокруг нас
+      </div>
+    </div>
+  </div>
+)}
         <footer className="footer" id="about">
           <span>© 2024 Verdantide</span>
           <span className="footer-line" />

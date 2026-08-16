@@ -256,3 +256,246 @@ h1 em { color: var(--heading-em); font-style: italic; }
   .scene-option { width: 32px; height: 32px; }
   .scene-options { padding: 6px; gap: 5px; }
 }
+/* ===== Окно «О нас» ===== */
+
+.about-nav-button {
+  color: var(--nav);
+  background: transparent;
+  border: 0;
+  padding: 18px 0;
+  font-size: 13px;
+  position: relative;
+  transition: color .2s ease;
+}
+
+.about-nav-button:hover {
+  color: var(--nav-active);
+}
+
+.about-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+
+  background: rgba(0, 0, 0, .38);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  animation: about-fade .22s ease both;
+}
+
+.about-modal {
+  position: relative;
+  width: min(500px, 100%);
+  padding: 40px 42px 30px;
+
+  color: var(--text);
+  text-align: center;
+
+  background: var(--overlay-strong);
+  border: 1px solid var(--border);
+  border-radius: 26px;
+
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, .28),
+    inset 0 1px rgba(255, 255, 255, .16);
+
+  animation: about-modal-in .28s ease both;
+}
+
+.about-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+
+  width: 34px;
+  height: 34px;
+
+  display: grid;
+  place-items: center;
+
+  color: var(--muted);
+  background: rgba(255, 255, 255, .08);
+
+  border: 1px solid var(--border);
+  border-radius: 50%;
+
+  transition: all .2s ease;
+}
+
+.about-close:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, .16);
+  transform: rotate(90deg);
+}
+
+.about-logo {
+  width: 58px;
+  height: 58px;
+
+  margin: 0 auto 19px;
+
+  display: grid;
+  place-items: center;
+
+  color: var(--accent);
+  background: rgba(255, 255, 255, .09);
+
+  border: 1px solid var(--border);
+  border-radius: 18px;
+}
+
+.about-label {
+  display: block;
+  margin-bottom: 7px;
+
+  color: var(--muted);
+
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.about-modal h2 {
+  margin: 0;
+
+  color: var(--heading);
+
+  font-family: 'Playfair Display', serif;
+  font-size: 38px;
+  font-weight: 500;
+  letter-spacing: -1.5px;
+}
+
+.about-description {
+  max-width: 390px;
+  margin: 13px auto 27px;
+
+  color: var(--subtext);
+
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.about-team {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.team-member {
+  padding: 17px 12px;
+
+  background: rgba(255, 255, 255, .07);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+
+.team-member strong {
+  display: block;
+  margin-bottom: 5px;
+
+  color: var(--heading);
+
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.team-member span {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.about-copyright {
+  margin-top: 23px;
+  padding-top: 18px;
+
+  color: var(--footer);
+
+  border-top: 1px solid rgba(255, 255, 255, .12);
+
+  font-size: 9px;
+}
+
+@keyframes about-fade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes about-modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 620px) {
+  .about-overlay {
+    padding: 16px;
+  }
+
+  .about-modal {
+    padding: 36px 20px 25px;
+    border-radius: 22px;
+  }
+
+  .about-modal h2 {
+    font-size: 34px;
+  }
+
+  .about-description {
+    font-size: 12px;
+  }
+}
+.image-preview {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  flex: 0 0 52px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.image-preview button {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  color: white;
+  background: rgba(0, 0, 0, 0.65);
+}
