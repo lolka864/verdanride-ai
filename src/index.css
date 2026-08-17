@@ -499,3 +499,350 @@ h1 em { color: var(--heading-em); font-style: italic; }
   color: white;
   background: rgba(0, 0, 0, 0.65);
 }
+
+/* ===== Форматированный текст в ответах (жирный/курсив/код) ===== */
+.message-bubble { white-space: pre-wrap; }
+.message-bubble .inline-code {
+  padding: 1px 5px;
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.12);
+  font-family: 'SFMono-Regular', Consolas, monospace;
+  font-size: 0.92em;
+}
+
+/* ===== Шапка чата: несколько действий рядом ===== */
+.chat-heading-actions { display: flex; align-items: center; gap: 14px; }
+
+/* ===== Копирование ответа ===== */
+.message-meta { display: flex; align-items: center; gap: 10px; margin-top: 5px; }
+.copy-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 10px;
+  padding: 2px 4px;
+  border-radius: 6px;
+  transition: color .2s ease, background .2s ease;
+}
+.copy-button:hover { color: var(--panel-text); background: rgba(255, 255, 255, 0.14); }
+
+/* ===== История чатов ===== */
+.history-modal {
+  position: relative;
+  width: min(440px, 100%);
+  max-height: min(70vh, 560px);
+  display: flex;
+  flex-direction: column;
+  padding: 34px 30px 26px;
+
+  color: var(--text);
+
+  background: var(--overlay-strong);
+  border: 1px solid var(--border);
+  border-radius: 26px;
+
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, .28),
+    inset 0 1px rgba(255, 255, 255, .16);
+
+  animation: about-modal-in .28s ease both;
+}
+
+.history-title {
+  margin: 4px 0 18px;
+  color: var(--heading);
+  font-family: 'Playfair Display', serif;
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+}
+
+.history-empty {
+  color: var(--subtext);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.history-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  text-align: left;
+  transition: background .2s ease, border-color .2s ease;
+}
+.history-item:hover { background: rgba(255, 255, 255, 0.14); }
+.history-item.active { border-color: var(--accent); background: rgba(255, 255, 255, 0.16); }
+
+.history-item-title {
+  font-size: 12.5px;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.history-item-actions { display: flex; align-items: center; gap: 10px; flex: 0 0 auto; }
+.history-item-date { color: var(--muted); font-size: 10px; }
+.history-delete {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  color: var(--muted);
+  transition: color .2s ease, background .2s ease;
+}
+.history-delete:hover { color: #d86a6a; background: rgba(216, 106, 106, 0.14); }
+
+@media (max-width: 620px) {
+  .history-modal { padding: 26px 18px 20px; border-radius: 20px; }
+  .chat-heading-actions { gap: 8px; }
+  .chat-heading-actions .new-chat span { display: none; }
+}
+/* ===== Загадочная секция (маскот) ===== */
+
+/* ===== Амулет (загадочная деталь) ===== */
+.amulet-button {
+  position: fixed;
+  left: 24px;
+  bottom: 24px;
+  z-index: 20;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(212, 175, 100, 0.35);
+  border-radius: 50%;
+  background: var(--overlay-strong);
+  backdrop-filter: blur(16px);
+  color: #c9a24a;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.14);
+  transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease;
+}
+
+.amulet-button:hover {
+  transform: translateY(-2px);
+  border-color: rgba(212, 175, 100, 0.7);
+  box-shadow: 0 10px 26px rgba(0,0,0,0.2);
+}
+
+.amulet-button svg {
+  animation: amulet-glow 3.5s ease-in-out infinite;
+}
+
+@keyframes amulet-glow {
+  0%, 100% { opacity: 0.75; }
+  50% { opacity: 1; filter: drop-shadow(0 0 4px rgba(201, 162, 74, 0.6)); }
+}
+
+.mystery-modal {
+  position: relative;
+  width: min(420px, 100%);
+  padding: 46px 38px 34px;
+  text-align: center;
+  color: #eee6d8;
+  background: linear-gradient(180deg, #14100c 0%, #0c0a08 100%);
+  border: 1px solid rgba(212, 175, 100, 0.25);
+  border-radius: 24px;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.4), inset 0 1px rgba(255,255,255,0.04);
+  animation: about-modal-in .28s ease both;
+}
+
+.mystery-modal .about-close {
+  color: rgba(238, 230, 216, 0.5);
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(212, 175, 100, 0.2);
+}
+
+.mystery-modal .about-close:hover {
+  color: #eee6d8;
+  background: rgba(255,255,255,0.1);
+}
+
+.mystery-modal-icon {
+  width: 140px;
+  height: 140px;
+  margin: 0 auto 24px;
+}
+
+.mystery-modal-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 20px;
+}
+
+.mystery-modal-label {
+  display: block;
+  margin-bottom: 10px;
+  color: rgba(201, 162, 74, 0.7);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+}
+
+.mystery-modal h2 {
+  margin: 0 0 16px;
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  font-weight: 500;
+  letter-spacing: -0.5px;
+  color: #f3e9d8;
+}
+
+.mystery-modal p {
+  max-width: 320px;
+  margin: 0 auto;
+  color: rgba(238, 230, 216, 0.6);
+  font-size: 13px;
+  line-height: 1.75;
+}
+
+@media (max-width: 620px) {
+  .amulet-button { left: 16px; bottom: 16px; width: 40px; height: 40px; }
+  .mystery-modal { padding: 38px 24px 28px; border-radius: 20px; }
+}
+
+/* ===== Ролевая игра ===== */
+.roleplay-page {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 40px 0 60px;
+  animation: rise .5s ease both;
+}
+
+.roleplay-page-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+
+.roleplay-title {
+  margin: 28px 0 6px;
+  color: var(--heading);
+  font-family: 'Playfair Display', serif;
+  font-size: 34px;
+  font-weight: 500;
+  letter-spacing: -1px;
+}
+
+.roleplay-subtitle {
+  margin: 0 0 26px;
+  color: var(--subtext);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.roleplay-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 26px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--overlay-strong);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 14px 40px rgba(0,0,0,0.14);
+}
+
+.roleplay-field { display: flex; flex-direction: column; gap: 6px; }
+
+.roleplay-field-label {
+  color: var(--panel-text);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .3px;
+}
+
+.roleplay-input,
+.roleplay-textarea {
+  width: 100%;
+  padding: 11px 13px;
+  color: var(--text);
+  background: rgba(255,255,255,0.08);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font-size: 13px;
+  font-family: inherit;
+  line-height: 1.5;
+  resize: vertical;
+  transition: border-color .2s ease, background .2s ease;
+}
+
+.roleplay-input:focus,
+.roleplay-textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: rgba(255,255,255,0.14);
+}
+
+.roleplay-input::placeholder,
+.roleplay-textarea::placeholder { color: var(--muted); }
+
+.roleplay-start-button {
+  margin-top: 6px;
+  padding: 13px 18px;
+  color: #fff;
+  background: var(--send-bg);
+  border: 0;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background .2s ease, transform .2s ease, opacity .2s ease;
+}
+
+.roleplay-start-button:hover:not(:disabled) {
+  background: var(--send-hover);
+  transform: translateY(-1px);
+}
+
+.roleplay-start-button:disabled { opacity: .5; cursor: not-allowed; }
+
+.roleplay-chat-panel { margin-top: 26px; width: 100%; }
+.roleplay-chat-panel .messages { max-height: 460px; }
+
+.roleplay-bubble { white-space: normal; }
+
+.rp-line { margin: 0; }
+.rp-line + .rp-line { margin-top: 8px; }
+
+.rp-action {
+  color: var(--muted);
+  font-style: italic;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.rp-speech {
+  color: var(--bubble-text);
+  font-weight: 500;
+  line-height: 1.55;
+}
+
+.user .rp-speech { color: var(--user-bubble-text); }
+.user .rp-action { color: rgba(255,255,255,0.75); }
+
+@media (max-width: 620px) {
+  .roleplay-page { padding: 24px 0 40px; }
+  .roleplay-title { font-size: 27px; }
+  .roleplay-form { padding: 18px; border-radius: 16px; }
+}

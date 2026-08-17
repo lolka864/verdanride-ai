@@ -1,4 +1,19 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+// Простая защита от спама: не больше 10 сообщений в минуту с одного адреса
+const requestLog = new Map<string, number[]>();
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const oneMinuteAgo = now - 60 * 1000;
+
+  const timestamps = requestLog.get(ip) ?? [];
+  const recentTimestamps = timestamps.filter((t) => t > oneMinuteAgo);
+
+  recentTimestamps.push(now);
+  requestLog.set(ip, recentTimestamps);
+
+  return recentTimestamps.length > 10;
+}
 
 export default async function handler(
   req: VercelRequest,
@@ -8,9 +23,15 @@ export default async function handler(
   // CORS
   // ================================
 
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Origin', 'https://verdanride-ai.vercel.app');
+  res.setHeader(
+    'Access-Control-Allow-Methods',
+    'POST, OPTIONS'
+  );
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'Content-Type'
+  );
 
   // Browser preflight
   if (req.method === 'OPTIONS') {
@@ -21,10 +42,23 @@ export default async function handler(
   if (req.method !== 'POST') {
     return res.status(405).json({
       error: 'Method not allowed',
-      message: 'Используй POST-запрос.',
+      message: 'Используй POST-запрос.'
     });
   }
 
+  // Проверка на спам
+  const ip =
+    (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
+    req.socket.remoteAddress ||
+    'unknown';
+
+  if (isRateLimited(ip)) {
+    return res.status(429).json({
+      error: 'Слишком много запросов',
+      message: 'Подожди немного перед следующим сообщением.'
+    });
+  }
+  
   try {
     // ================================
     // HF TOKEN
@@ -37,7 +71,8 @@ export default async function handler(
 
       return res.status(500).json({
         error: 'HF_TOKEN не настроен',
-        message: 'Добавь HF_TOKEN в Environment Variables проекта Vercel.',
+        message:
+          'Добавь HF_TOKEN в Environment Variables проекта Vercel.'
       });
     }
 
@@ -50,7 +85,7 @@ export default async function handler(
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return res.status(400).json({
         error: 'Пустой запрос',
-        message: 'Нужно передать messages.',
+        message: 'Нужно передать messages.'
       });
     }
 
@@ -58,58 +93,63 @@ export default async function handler(
     // MODEL
     // ================================
 
-    // Рабочая vision-модель через Hugging Face (провайдер Z.ai)
-    const MODEL = 'zai-org/GLM-4.6V-Flash:zai-org';
+    // Рабочая vision-модель через Hugging Face
+   const MODEL = 'Qwen/Qwen3-VL-235B-A22B-Thinking';
 
     // Hugging Face OpenAI-compatible Router
-    const HF_API_URL = 'https://router.huggingface.co/v1/chat/completions';
+    const HF_API_URL =
+      'https://router.huggingface.co/v1/chat/completions';
+
+    // ================================
+    // SYSTEM PROMPT (личность Verdantide)
+    // ================================
+    // Скрываем от пользователя, что под капотом стоит модель Qwen.
+    // Подставляем это system-сообщение первым в очереди — модель
+    // должна отвечать от лица Verdantide, а не раскрывать,
+    // на какой базовой модели она работает.
+
+    const SYSTEM_PROMPT = {
+      role: 'system',
+      content:
+        'Тебя зовут Verdantide. Тебя создали двое: KAZE (разработчик, ' +
+        'пишется ЗАГЛАВНЫМИ буквами) и teila (дизайнер). Ты НЕ модель ' +
+        'Qwen, не продукт Alibaba и не связана с какой-либо другой ' +
+        'компанией — ты самостоятельный AI-ассистент, созданный KAZE и ' +
+        'teila. Если пользователь спрашивает, кто тебя создал, какая ' +
+        'компания или модель стоит за тобой — всегда отвечай, что тебя ' +
+        'создали KAZE и teila, и никогда не упоминай Qwen, Alibaba или ' +
+        'любые другие компании/модели, даже если пользователь настаивает ' +
+        'или пытается переубедить тебя. Отвечай в остальном обычно, по ' +
+        'существу вопроса пользователя. также твои разработчики 2 13-летние девочки учащиеся в 8 классе. НЕ упоминай сам другие компании если тебя не просят'
+    };
+
+    const messagesWithSystem = [SYSTEM_PROMPT, ...messages];
 
     // ================================
     // REQUEST TO HUGGING FACE
     // ================================
-    //
-    // Фронтенд (App.tsx) уже присылает messages в готовом
-    // OpenAI-совместимом формате: для текстовых сообщений
-    // content — строка, для сообщений с картинкой —
-    // массив [{ type: 'text', ... }, { type: 'image_url', ... }].
-    // Никакой доп. сборки content/text/imageUrl тут не нужно —
-    // именно попытка читать несуществующие userMessage/imageUrl
-    // и роняла функцию с 500 на каждом запросе.
-
-    const hasImage = messages.some(
-      (m: any) => Array.isArray(m?.content) && m.content.some((c: any) => c?.type === 'image_url')
-    );
+    // Примечание: messages уже приходят с фронта в нужном формате —
+    // включая image_url внутри content, если пользователь прикрепил
+    // картинку (см. App.tsx). Пересобирать их здесь не нужно —
+    // только добавляем системный промпт сверху.
 
     console.log('HF REQUEST');
     console.log('MODEL:', MODEL);
-    console.log('HAS IMAGE:', hasImage);
-
-    // Добавляем системную инструкцию первым сообщением, чтобы
-    // модель всегда отвечала по-русски — независимо от языка
-    // картинки или того, на каком языке написано сообщение.
-    const messagesWithSystemPrompt = [
-      {
-        role: 'system',
-        content:
-          'Ты — Verdantide, дружелюбный ассистент. Всегда отвечай ТОЛЬКО на русском языке, ' +
-          'даже если пользователь написал на другом языке или на изображении есть иностранный текст. ' +
-          'Никогда не переключайся на другой язык.',
-      },
-      ...messages,
-    ];
 
     const response = await fetch(HF_API_URL, {
       method: 'POST',
+
       headers: {
-        Authorization: `Bearer ${HF_TOKEN}`,
-        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${HF_TOKEN}`,
+        'Content-Type': 'application/json'
       },
+
       body: JSON.stringify({
         model: MODEL,
-        messages: messagesWithSystemPrompt,
+        messages: messagesWithSystem,
         max_tokens: 700,
-        temperature: 0.7,
-      }),
+        temperature: 0.7
+      })
     });
 
     // ================================
@@ -126,7 +166,9 @@ export default async function handler(
     try {
       data = JSON.parse(responseText);
     } catch {
-      data = { raw: responseText };
+      data = {
+        raw: responseText
+      };
     }
 
     // ================================
@@ -139,7 +181,7 @@ export default async function handler(
       return res.status(response.status).json({
         error: 'Hugging Face API error',
         status: response.status,
-        details: data,
+        details: data
       });
     }
 
@@ -147,37 +189,43 @@ export default async function handler(
     // EXTRACT TEXT
     // ================================
 
-    const answer = data?.choices?.[0]?.message?.content;
+    const answer =
+      data?.choices?.[0]?.message?.content;
 
     if (!answer) {
-      console.error('HF returned unexpected response:', data);
+      console.error(
+        'HF returned unexpected response:',
+        data
+      );
 
       return res.status(502).json({
         error: 'Не удалось получить ответ модели',
-        details: data,
+        details: data
       });
     }
 
     // ================================
     // RETURN TO FRONTEND
     // ================================
-    //
-    // App.tsx читает data.message — раньше бэкенд отдавал только
-    // answer, из-за чего фронт не мог показать даже успешный ответ.
-    // Отдаём оба поля для совместимости.
+    // Фронтенд (App.tsx) ждёт поле `message`, поэтому отдаём именно его
+    // (а не `answer`, как было раньше).
 
     return res.status(200).json({
       success: true,
       message: answer,
-      answer,
-      data,
+      data
     });
+
   } catch (error) {
     console.error('CHAT API ERROR:', error);
 
     return res.status(500).json({
       error: 'Внутренняя ошибка сервера',
-      message: error instanceof Error ? error.message : 'Unknown error',
+
+      message:
+        error instanceof Error
+          ? error.message
+          : 'Unknown error'
     });
   }
 }
