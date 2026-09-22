@@ -14,7 +14,8 @@ import {
   Moon,
   RefreshCw,
   Search,
-  Send,
+    Send,
+  Settings,
   Sparkles,
   Sun,
   Trash2,
@@ -73,6 +74,7 @@ type Conversation = {
 };
 
 const HISTORY_STORAGE_KEY = 'verdantide_conversations';
+const CUSTOM_PROMPT_KEY = 'verdantide_custom_prompt';
 type RoleplayConversation = {
   id: string;
   title: string;
@@ -195,6 +197,8 @@ function App() {
   const [sceneIndex, setSceneIndex] = useState(1);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isAboutOpen, setIsAboutOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [customPrompt, setCustomPrompt] = useState('');
   const [isMysteryOpen, setIsMysteryOpen] = useState(false);
   const [currentView, setCurrentView] = useState<'main' | 'roleplay'>('main');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -264,6 +268,12 @@ const [roleplayForm, setRoleplayForm] = useState<RoleplayForm>(emptyRoleplayForm
       return next;
     });
   }, [roleplayMessages, roleplayStarted, currentRoleplayId, roleplayForm]);
+
+  // Загружаем сохранённую историю чатов один раз при старте
+  useEffect(() => {
+    const savedPrompt = localStorage.getItem(CUSTOM_PROMPT_KEY);
+    if (savedPrompt) setCustomPrompt(savedPrompt);
+  }, []);
 
   // Загружаем сохранённую историю чатов один раз при старте
   useEffect(() => {
@@ -348,8 +358,9 @@ const sendMessage = async (event?: FormEvent) => {
       headers: {
         'Content-Type': 'application/json',
       },
-      signal: controller.signal,
+            signal: controller.signal,
       body: JSON.stringify({
+        customPrompt,
         messages: updatedMessages.map((message) => ({
           role: message.role,
           content: message.image
@@ -898,6 +909,9 @@ const typeOutMessage = (
             <button className="icon-button" onClick={() => setIsDark((value) => !value)} aria-label="Переключить тему">
               {isDark ? <Sun size={18} /> : <Moon size={18} />}
             </button>
+                        <button className="icon-button" onClick={() => setIsSettingsOpen(true)} aria-label="Настройки">
+              <Settings size={18} />
+            </button>
             <button className="icon-button notification-button" aria-label="Уведомления"><Bell size={18} /><span /></button>
             <button className="profile-button" aria-label="Профиль"><Leaf size={18} /></button>
             <button className="mobile-menu-button" onClick={() => setMobileMenuOpen((value) => !value)} aria-label="Открыть меню">
@@ -1104,6 +1118,79 @@ const typeOutMessage = (
     </div>
   </div>
 )}
+
+{isSettingsOpen && (
+  <div
+    className="about-overlay"
+    onClick={() => setIsSettingsOpen(false)}
+  >
+    <div
+      className="about-modal"
+      onClick={(event) => event.stopPropagation()}
+    >
+      <button
+        className="about-close"
+        onClick={() => setIsSettingsOpen(false)}
+        aria-label="Закрыть"
+      >
+        <X size={18} />
+      </button>
+
+      <div className="about-logo">
+        <Settings size={28} strokeWidth={1.4} />
+      </div>
+
+      <span className="about-label">Настройки</span>
+
+      <h2>Как отвечать?</h2>
+
+      <p className="about-description">
+        Напиши, каким должен быть бот — например: "отвечай коротко и с юмором"
+        или "объясняй как для новичка". Сохранится, пока не изменишь.
+      </p>
+
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '10px', justifyContent: 'center' }}>
+        {['Дружелюбно и с юмором', 'Коротко и по делу', 'Тепло и заботливо'].map((preset) => (
+          <button key={preset} type="button" onClick={() => setCustomPrompt(preset)} className="new-chat">
+            {preset}
+          </button>
+        ))}
+      </div>
+
+      
+
+      <textarea
+        value={customPrompt}
+        onChange={(event) => setCustomPrompt(event.target.value)}
+        placeholder="Например: отвечай тепло и по-дружески, используй смайлики"
+        rows={5}
+        style={{
+          width: '100%',
+          borderRadius: '14px',
+          border: '1px solid var(--border)',
+          background: 'rgba(255,255,255,0.08)',
+          color: 'var(--text)',
+          padding: '12px 14px',
+          fontSize: '13px',
+          fontFamily: 'inherit',
+          resize: 'vertical',
+        }}
+      />
+
+      <button
+        className="send-button"
+        style={{ margin: '16px auto 0', borderRadius: '14px', width: 'auto', padding: '10px 22px' }}
+        onClick={() => {
+          localStorage.setItem(CUSTOM_PROMPT_KEY, customPrompt);
+          setIsSettingsOpen(false);
+        }}
+      >
+        Сохранить
+      </button>
+    </div>
+  </div>
+)}
+
 
 {isAboutOpen && (
   <div
