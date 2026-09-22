@@ -846,3 +846,47 @@ h1 em { color: var(--heading-em); font-style: italic; }
   .roleplay-title { font-size: 27px; }
   .roleplay-form { padding: 18px; border-radius: 16px; }
 }
+/* Scene 6 — Водопад в джунглях */
+.scene-5 {
+  --bg-image: linear-gradient(rgba(10,35,25,0.4), rgba(10,35,25,0.48)), url('/backgrounds/bc_6.jpg');
+  --overlay: rgba(8,30,22,0.35);
+  --overlay-strong: rgba(14,42,32,0.62);
+  --border: rgba(255,255,255,0.18);
+  --text: #e7f5ec; --heading: #f3fdf6; --heading-em: #7fd9a3;
+  --subtext: #c3ddc9; --muted: #aacbb4; --nav: #cde3d2; --nav-active: #f3fdf6;
+  --panel-text: #dcf0e1; --bubble: rgba(255,255,255,0.12); --bubble-text: #e7f5ec;
+  --user-bubble: #3f9e6e; --user-bubble-text: #f5fff8;
+  --send-bg: #3f9e6e; --send-hover: #338559; --accent: #4fc484;
+  --avatar-bg: rgba(255,255,255,0.15); --avatar-fg: #7fd9a3; --live: #7fd9a3;
+  --mode-title: #f3fdf6; --mode-desc: #c3ddc9; --footer: #aacbb4;
+}
+
+/* Scene 7 — Закат в пустыне */
+.scene-6 {
+  --bg-image: linear-gradient(rgba(50,25,20,0.32), rgba(50,25,20,0.42)), url('/backgrounds/bc_7.jpg');
+  --overlay: rgba(45,22,18,0.3);
+  --overlay-strong: rgba(58,30,24,0.6);
+  --border: rgba(255,255,255,0.2);
+  --text: #f7e9de; --heading: #fdf3ea; --heading-em: #f0a06b;
+  --subtext: #e0c6b5; --muted: #ccae9c; --nav: #ddc2b1; --nav-active: #fdf3ea;
+  --panel-text: #f2ddce; --bubble: rgba(255,255,255,0.14); --bubble-text: #f7e9de;
+  --user-bubble: #d97a45; --user-bubble-text: #fff8f2;
+  --send-bg: #d97a45; --send-hover: #c1642f; --accent: #e58a51;
+  --avatar-bg: rgba(255,255,255,0.15); --avatar-fg: #f0a06b; --live: #f0a06b;
+  --mode-title: #fdf3ea; --mode-desc: #e0c6b5; --footer: #ccae9c;
+}
+
+/* Scene 8 — Котик на лежанке (уютные коричневые тона) */
+.scene-7 {
+  --bg-image: linear-gradient(rgba(35,25,18,0.4), rgba(35,25,18,0.48)), url('/backgrounds/bc_8.jpg');
+  --overlay: rgba(30,22,16,0.35);
+  --overlay-strong: rgba(42,32,24,0.62);
+  --border: rgba(255,255,255,0.2);
+  --text: #f2e8dc; --heading: #fbf5eb; --heading-em: #d9a86c;
+  --subtext: #d8c6b2; --muted: #c2ab93; --nav: #d6c1a9; --nav-active: #fbf5eb;
+  --panel-text: #ecdcc8; --bubble: rgba(255,255,255,0.14); --bubble-text: #f2e8dc;
+  --user-bubble: #b8824c; --user-bubble-text: #fff9f1;
+  --send-bg: #b8824c; --send-hover: #9c6d3d; --accent: #c8965d;
+  --avatar-bg: rgba(255,255,255,0.15); --avatar-fg: #d9a86c; --live: #d9a86c;
+  --mode-title: #fbf5eb; --mode-desc: #d8c6b2; --footer: #c2ab93;
+}

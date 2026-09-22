@@ -5,6 +5,7 @@ import {
   BookOpen,
   Check,
   Copy,
+  Focus,
   Gem ,
   History,
   ImagePlus,
@@ -179,6 +180,9 @@ const backgrounds = [
   { name: 'Горное озеро', file: '/backgrounds/bc_3.jpg', tone: 'alpine' },
   { name: 'Летний луг', file: '/backgrounds/bc_4.jpg', tone: 'meadow' },
   { name: 'Сад сакуры', file: '/backgrounds/bc_5.jpg', tone: 'sakura' },
+  { name: 'Водопад в джунглях', file: '/backgrounds/bc_6.jpg', tone: 'jungle' },
+  { name: 'Закат в пустыне', file: '/backgrounds/bc_7.jpg', tone: 'desert' },
+  { name: 'Котик на лежанке', file: '/backgrounds/bc_8.jpg', tone: 'cozy' },
 ];
 
 const modes = [
@@ -229,6 +233,25 @@ const [roleplayForm, setRoleplayForm] = useState<RoleplayForm>(emptyRoleplayForm
       : `rp-${Date.now()}`
   );
   const [isRoleplayHistoryOpen, setIsRoleplayHistoryOpen] = useState(false);
+  const [helpedCount, setHelpedCount] = useState(0);
+const [focusMode, setFocusMode] = useState(false);
+
+useEffect(() => {
+  const target = 1247;
+  const steps = 40;
+  const increment = target / steps;
+  let current = 0;
+  const timer = setInterval(() => {
+    current += increment;
+    if (current >= target) {
+      setHelpedCount(target);
+      clearInterval(timer);
+    } else {
+      setHelpedCount(Math.floor(current));
+    }
+  }, 35);
+  return () => clearInterval(timer);
+}, []);
 
   useEffect(() => {
     roleplayEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -907,8 +930,10 @@ const typeOutMessage = (
 
           <div className="top-actions">
             <button className="icon-button" onClick={() => setIsDark((value) => !value)} aria-label="Переключить тему">
-              {isDark ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
+  <span key={isDark ? 'sun' : 'moon'} className="theme-icon-pop">
+    {isDark ? <Sun size={18} /> : <Moon size={18} />}
+  </span>
+</button>
                         <button className="icon-button" onClick={() => setIsSettingsOpen(true)} aria-label="Настройки">
               <Settings size={18} />
             </button>
@@ -920,11 +945,17 @@ const typeOutMessage = (
           </div>
         </header>
 
-        <section className="hero" id="top">
-          <div className="eyebrow"><span /> AI-помощник для любопытных <span /></div>
-          <h1>Твоя нейросеть.<br /><em>Твоя среда.</em> Твои ответы.</h1>
-          <p className="hero-copy">Исследуй мир вокруг с вниманием, ясностью и немного большим<br className="desktop-only" /> вдохновением.</p>
-        </section>
+        {!focusMode && (
+  <section className="hero" id="top">
+    <div className="eyebrow"><span /> AI-помощник для любопытных <span /></div>
+    <h1>Твоя нейросеть.<br /><em>Твоя среда.</em> Твои ответы.</h1>
+    <p className="hero-copy">Исследуй мир вокруг с вниманием, ясностью и немного большим<br className="desktop-only" /> вдохновением.</p>
+    <div className="stats-counter">
+      <span className="stats-number">{helpedCount.toLocaleString('ru-RU')}</span>
+      <span className="stats-label">раз помогла ответить на вопросы</span>
+    </div>
+  </section>
+)}
 
         <section className="chat-panel" id="chat">
           <div className="chat-heading">
@@ -932,9 +963,12 @@ const typeOutMessage = (
               <span className="live-dot" /> <span>Verdantide AI</span>
             </div>
             <div className="chat-heading-actions">
-              <button className="new-chat" onClick={() => setIsHistoryOpen(true)}><History size={14} /> История</button>
-              <button className="new-chat" onClick={startNewChat}><RefreshCw size={14} /> Новый диалог</button>
-            </div>
+  <button className="new-chat" onClick={() => setIsHistoryOpen(true)}><History size={14} /> История</button>
+  <button className="new-chat" onClick={startNewChat}><RefreshCw size={14} /> Новый диалог</button>
+  <button className="new-chat" onClick={() => setFocusMode((v) => !v)}>
+    <Focus size={14} /> {focusMode ? 'Обычный вид' : 'Фокус'}
+  </button>
+</div>
           </div>
           <div className="messages" id="conversation" aria-live="polite">
             {messages.map((message) => (
@@ -1023,12 +1057,15 @@ const typeOutMessage = (
           </form>
         </section>
 
-        <div className="prompt-list">
-          {quickPrompts.map((prompt) => <button key={prompt} onClick={() => choosePrompt(prompt)}><Sparkles size={14} />{prompt}</button>)}
-          <button className="refresh-prompt" onClick={() => setInput('Что нового происходит в природе?')} aria-label="Новый вопрос"><RefreshCw size={16} /></button>
-        </div>
+        {!focusMode && (
+  <div className="prompt-list">
+    {quickPrompts.map((prompt) => <button key={prompt} onClick={() => choosePrompt(prompt)}><Sparkles size={14} />{prompt}</button>)}
+    <button className="refresh-prompt" onClick={() => setInput('Что нового происходит в природе?')} aria-label="Новый вопрос"><RefreshCw size={16} /></button>
+  </div>
+)}
 
-        <section className="modes-section" id="modes">
+       {!focusMode && (
+<section className="modes-section" id="modes">
           <div className="section-label"><span><Sparkles size={15} /> Режимы</span><a href="#modes">Все режимы <ArrowUpRight size={14} /></a></div>
           <div className="mode-grid">
             {modes.map(({ title, description, icon: Icon, tone }) => (
@@ -1050,7 +1087,8 @@ const typeOutMessage = (
   </button>
 ))}
           </div>
-        </section>
+                </section>
+        )}
         
 
 {isHistoryOpen && (
