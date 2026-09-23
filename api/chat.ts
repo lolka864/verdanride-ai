@@ -94,7 +94,7 @@ export default async function handler(
     // ================================
 
     // Рабочая vision-модель через Hugging Face
-   const MODEL = 'google/paligemma2-10b-mix-448';
+   const MODEL = "Qwen/Qwen2.5-VL-7B-Instruct"
 
     // Hugging Face OpenAI-compatible Router
     const HF_API_URL =
