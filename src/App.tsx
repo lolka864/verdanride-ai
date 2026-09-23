@@ -950,7 +950,7 @@ const typeOutMessage = (
     <p className="hero-copy">Исследуй мир вокруг с вниманием, ясностью и немного большим<br className="desktop-only" /> вдохновением.</p>
 <div className="stats-counter">
   <span className="stats-number">{totalRealChats.toLocaleString('ru-RU')}</span>
-  <span className="stats-label">всего созданных диалогов и историй</span>
+  <span className="stats-label"> всего созданных диалогов и историй</span>
 </div>
 
   </section>
