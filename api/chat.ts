@@ -94,7 +94,7 @@ export default async function handler(
     // ================================
 
     // Рабочая vision-модель через Hugging Face
-   const MODEL = 'Qwen/Qwen3-VL-235B-A22B-Thinking';
+   const MODEL = 'google/paligemma2-10b-mix-448';
 
     // Hugging Face OpenAI-compatible Router
     const HF_API_URL =
@@ -220,6 +220,12 @@ export default async function handler(
         details: data
       });
     }
+
+    if (response.status === 402) {
+  return res.status(503).json({
+    error: 'Лимит модели исчерпан. Попробуй позже.'
+  });
+}
 
     // ================================
     // RETURN TO FRONTEND
