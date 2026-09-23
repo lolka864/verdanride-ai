@@ -202,6 +202,34 @@ export default async function handler(
       });
     }
 
+    try {
+  // Тут у вас происходит fetch или вызов openai.chat.completions.create
+  const response = await fetch(HF_API_URL, { /* настройки запроса */ });
+
+  // Если сервер ответил ошибкой лимита (обычно это 429) или любой другой ошибкой сервера
+  if (!response.ok) {
+    if (response.status === 429 || response.status === 400) {
+      return new Response(
+        JSON.stringify({ 
+          error: "Превышен лимит запросов. Мы используем бесплатные источники ИИ, поэтому лимиты иногда заканчиваются. Пожалуйста, попробуйте позже." 
+        }), 
+        { status: response.status, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+    throw new Error(`Hugging Face API error: ${response.status}`);
+  }
+
+  // Продолжение успешной обработки...
+} catch (error: any) {
+  console.error(error);
+  // Запасной перехват на случай падения самого запроса
+  return new Response(
+    JSON.stringify({ error: "Временный сбой источника ИИ. Лимиты бесплатных моделей могут быть исчерпаны. Попробуйте снова через пару минут." }), 
+    { status: 500, headers: { 'Content-Type': 'application/json' } }
+  );
+}
+
+
     // ================================
     // EXTRACT TEXT
     // ================================

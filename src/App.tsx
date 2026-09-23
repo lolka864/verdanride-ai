@@ -236,22 +236,20 @@ const [roleplayForm, setRoleplayForm] = useState<RoleplayForm>(emptyRoleplayForm
   const [helpedCount, setHelpedCount] = useState(0);
 const [focusMode, setFocusMode] = useState(false);
 
-useEffect(() => {
-  const target = 1247;
-  const steps = 40;
-  const increment = target / steps;
-  let current = 0;
-  const timer = setInterval(() => {
-    current += increment;
-    if (current >= target) {
-      setHelpedCount(target);
-      clearInterval(timer);
-    } else {
-      setHelpedCount(Math.floor(current));
-    }
-  }, 35);
-  return () => clearInterval(timer);
-}, []);
+const totalRealChats = (() => {
+  // Проверяем, написал ли пользователь что-то в текущем открытом чате
+  const isCurrentChatActive = messages.some(m => m.role === 'user') ? 1 : 0;
+  
+  // Проверяем, запущена ли сейчас ролевая игра
+  const isCurrentRoleplayActive = roleplayStarted ? 1 : 0;
+
+  // Считаем старые сохраненные чаты, отсекая текущие ID, чтобы не дублировать
+  const savedChatsCount = conversations.filter(c => c.id !== currentConversationId).length;
+  const savedRoleplaysCount = roleplayConversations.filter(rp => rp.id !== currentRoleplayId).length;
+
+  return savedChatsCount + savedRoleplaysCount + isCurrentChatActive + isCurrentRoleplayActive;
+})();
+
 
   useEffect(() => {
     roleplayEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -950,10 +948,12 @@ const typeOutMessage = (
     <div className="eyebrow"><span /> AI-помощник для любопытных <span /></div>
     <h1>Твоя нейросеть.<br /><em>Твоя среда.</em> Твои ответы.</h1>
     <p className="hero-copy">Исследуй мир вокруг с вниманием, ясностью и немного большим<br className="desktop-only" /> вдохновением.</p>
-    <div className="stats-counter">
-      <span className="stats-number">{helpedCount.toLocaleString('ru-RU')}</span>
-      <span className="stats-label">раз помогла ответить на вопросы</span>
-    </div>
+    // СТАЛО (Вставьте это вместо старого блока):
+<div className="stats-counter">
+  <span className="stats-number">{totalRealChats.toLocaleString('ru-RU')}</span>
+  <span className="stats-label">всего созданных диалогов и историй</span>
+</div>
+
   </section>
 )}
 
