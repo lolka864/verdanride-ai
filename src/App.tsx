@@ -948,7 +948,6 @@ const typeOutMessage = (
     <div className="eyebrow"><span /> AI-помощник для любопытных <span /></div>
     <h1>Твоя нейросеть.<br /><em>Твоя среда.</em> Твои ответы.</h1>
     <p className="hero-copy">Исследуй мир вокруг с вниманием, ясностью и немного большим<br className="desktop-only" /> вдохновением.</p>
-    // СТАЛО (Вставьте это вместо старого блока):
 <div className="stats-counter">
   <span className="stats-number">{totalRealChats.toLocaleString('ru-RU')}</span>
   <span className="stats-label">всего созданных диалогов и историй</span>
